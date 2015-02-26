@@ -35,7 +35,7 @@ public class TestMiniHBaseClusterThread {
   public void testThreadStartupAndShutdown() throws Exception {
     // Create mocks.
     Log log = createMock(Log.class);
-    MiniHBaseCluster hbaseCluster = createMock(MiniHBaseCluster.class);
+    PluginMiniHBaseCluster hbaseCluster = createMock(PluginMiniHBaseCluster.class);
 
     // Expect a bunch of log calls.
     log.info(anyObject(String.class));
@@ -51,7 +51,7 @@ public class TestMiniHBaseClusterThread {
     replay(hbaseCluster);
 
     // Create the thread.
-    MiniHBaseClusterThread thread = new MiniHBaseClusterThread(log, hbaseCluster);
+    PluginMiniHBaseClusterThread thread = new PluginMiniHBaseClusterThread(log, hbaseCluster);
     assertFalse(thread.isClusterReady());
 
     // Start the thread.

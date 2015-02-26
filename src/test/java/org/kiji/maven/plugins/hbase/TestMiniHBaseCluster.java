@@ -17,10 +17,16 @@
 
 package org.kiji.maven.plugins.hbase;
 
-import java.net.ServerSocket;
+import static org.easymock.EasyMock.anyObject;
+import static org.easymock.EasyMock.createMock;
+import static org.easymock.EasyMock.expect;
+import static org.easymock.EasyMock.expectLastCall;
+import static org.easymock.EasyMock.replay;
+import static org.easymock.EasyMock.verify;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
-import static org.easymock.EasyMock.*;
-import static org.junit.Assert.*;
+import java.net.ServerSocket;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
@@ -70,7 +76,7 @@ public class TestMiniHBaseCluster {
     mHBaseTestUtil.shutdownMiniCluster();
 
     replayMocks();
-    MiniHBaseCluster cluster = new MiniHBaseCluster(mLog, false /* Disable MR */, mHBaseTestUtil);
+    PluginMiniHBaseCluster cluster = new PluginMiniHBaseCluster(mLog, false /* Disable MR */, mHBaseTestUtil);
     cluster.startup();
     cluster.shutdown();
     verifyMocks();
@@ -90,7 +96,7 @@ public class TestMiniHBaseCluster {
     mHBaseTestUtil.shutdownMiniCluster();
 
     // Expect that the MapReduce cluster will be started and stopped.
-    mHBaseTestUtil.startMiniMapReduceCluster(1);
+    expect(mHBaseTestUtil.startMiniMapReduceCluster()).andReturn(null).anyTimes();
 
     mHBaseTestUtil.shutdownMiniMapReduceCluster();
     // Expect the HBase testing utility to request a test dir for mapred.
@@ -98,7 +104,7 @@ public class TestMiniHBaseCluster {
         .andReturn(new Path("/mapred-working"));
 
     replayMocks();
-    MiniHBaseCluster cluster = new MiniHBaseCluster(mLog, true /* Enable MR */, mHBaseTestUtil);
+    PluginMiniHBaseCluster cluster = new PluginMiniHBaseCluster(mLog, true /* Enable MR */, mHBaseTestUtil);
     cluster.startup();
     cluster.shutdown();
     verifyMocks();
@@ -110,7 +116,7 @@ public class TestMiniHBaseCluster {
     ServerSocket ss = new ServerSocket(9867);
     ss.setReuseAddress(true);
     try {
-      int openPort = MiniHBaseCluster.findOpenPort(9867);
+      int openPort = PluginMiniHBaseCluster.findOpenPort(9867);
       assertTrue("Port 9867 is already bound!", openPort > 9867);
     } finally {
       ss.close();
@@ -133,7 +139,7 @@ public class TestMiniHBaseCluster {
     // Port 9867 is unlikely to be in use, since we just successfully bound to it
     // and closed it.
 
-    int openPort = MiniHBaseCluster.findOpenPort(9867);
+    int openPort = PluginMiniHBaseCluster.findOpenPort(9867);
     assertEquals("Port 9867 shouldn't be currently bound!", 9867, openPort);
   }
 }
