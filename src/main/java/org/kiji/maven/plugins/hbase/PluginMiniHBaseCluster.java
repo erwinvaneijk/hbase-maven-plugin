@@ -19,31 +19,33 @@ package org.kiji.maven.plugins.hbase;
 
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.Random;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseTestingUtility;
+import org.apache.hadoop.hbase.HConstants;
 import org.apache.maven.plugin.logging.Log;
 
 /**
  * A in-process mini HBase cluster that may be started and stopped.
  */
 public class PluginMiniHBaseCluster extends MavenLogged {
-    private org.apache.hadoop.hbase.MiniHBaseCluster mMiniCluster;
+    private org.apache.hadoop.hbase.MiniHBaseCluster _miniHbaseCluster;
 
     /**
      * An HBase testing utility for starting/stopping the cluster.
      */
-    private final HBaseTestingUtility mTestUtil;
+    private final HBaseTestingUtility _testUtility;
 
     /**
      * Whether a mini MapReduce cluster should also be run.
      */
-    private final boolean mIsMapReduceEnabled;
+    private final boolean _isMapReduceEnabled;
 
     /**
      * Whether the cluster is running.
      */
-    private boolean mIsRunning;
+    private boolean _isRunning;
 
     /**
      * Creates a new <code>MiniHBaseCluster</code> instance.
@@ -56,9 +58,10 @@ public class PluginMiniHBaseCluster extends MavenLogged {
         //this(log, enableMapReduce, new HBaseTestingUtility(conf));
         super(log);
         getLog().info("PluginMiniHBaseCluster(configuration)");
-        mTestUtil = new HBaseTestingUtility((reconfigure(conf)));
-        mIsMapReduceEnabled = enableMapReduce;
-        mIsRunning = false;
+        final Configuration configuration = reconfigure(conf);
+        _testUtility = new HBaseTestingUtility((configuration));
+        _isMapReduceEnabled = enableMapReduce;
+        _isRunning = false;
     }
 
     /**
@@ -71,9 +74,9 @@ public class PluginMiniHBaseCluster extends MavenLogged {
     public PluginMiniHBaseCluster(Log log, boolean enableMapReduce, HBaseTestingUtility hbaseTestUtil) {
         super(log);
         getLog().info("The other one.");
-        mTestUtil = configure(hbaseTestUtil);
-        mIsMapReduceEnabled = enableMapReduce;
-        mIsRunning = false;
+        _testUtility = configure(hbaseTestUtil);
+        _isMapReduceEnabled = enableMapReduce;
+        _isRunning = false;
     }
 
     /**
@@ -103,27 +106,30 @@ public class PluginMiniHBaseCluster extends MavenLogged {
         // the "normal" ports. We override *all* ports first, so that
         // we ensure that this can start without a problem.
 
-        /*
         int offset = new Random(System.currentTimeMillis()).nextInt(1500) + 500;
 
         // Move the master to a hopefully unused port.
-        configuration.setInt(HConstants.MASTER_PORT, findOpenPort(HConstants.DEFAULT_MASTER_PORT + offset));
+        // configuration.setInt(HConstants.MASTER_PORT, findOpenPort(HConstants.DEFAULT_MASTER_PORT + offset));
         // Disable the master's web UI.
         configuration.setInt("hbase.master.info.port", -1);
 
         // Move the regionserver to a hopefully unused port.
         configuration.setInt(HConstants.REGIONSERVER_PORT,
             findOpenPort(HConstants.DEFAULT_REGIONSERVER_PORT + offset));
-        // Disable the regionserver's web UI.
-        configuration.setInt("hbase.regionserver.info.port", -1);
+        configuration.setInt("hbase.regionserver.info.port",
+            findOpenPort(HConstants.DEFAULT_REGIONSERVER_PORT + 10 + offset));
+
+        configuration.setBoolean("hbase.cluster.distributed", false);
 
         // Increase max zookeeper client connections.
         configuration.setInt("hbase.zookeeper.property.maxClientCnxns", 80);
 
+        configuration.set("hbase.master.logcleaner.plugins",
+            "org.apache.hadoop.hbase.master.cleaner.TimeToLiveLogCleaner");
+
         // TODO(gwu): Increasing the port numbers by a constant is not sufficient for multiple
         // executions of this plugin on the same machine.  Allow this to be specified as a
         // maven plugin parameter.
-*/
         return configuration;
     }
 
@@ -152,7 +158,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
             finally {
                 if (ss != null) {
                     try {
-                        // TODO(aaron): Techincally, this causes a race condition. Another instance of
+                        // TODO(aaron): Technically, this causes a race condition. Another instance of
                         // findOpenPort() could determine that this port is available between now and
                         // when the client of this method calls this function.
                         ss.close();
@@ -178,10 +184,11 @@ public class PluginMiniHBaseCluster extends MavenLogged {
         }
         getLog().info("Starting my mini cluster");
 
-        getLog().info(mTestUtil.getConfiguration().toString());
-        mMiniCluster = mTestUtil.startMiniCluster();
+        getLog().info(_testUtility.getConfiguration().toString());
+        _miniHbaseCluster = _testUtility.startMiniCluster();
 
-        if (mIsMapReduceEnabled) {
+        getLog().info("Mini cluster started");
+        if (_isMapReduceEnabled) {
             getLog().info("Starting MapReduce cluster...");
 
 
@@ -189,15 +196,15 @@ public class PluginMiniHBaseCluster extends MavenLogged {
             getConfiguration().set("hadoop.log.dir", getConfiguration().get("hadoop.tmp.dir"));
 
             // Start a mini MapReduce cluster with one server.
-            mTestUtil.startMiniMapReduceCluster();
+            _testUtility.startMiniMapReduceCluster();
 
             // Set the mapred.working.dir so stuff like partition files get written somewhere reasonable.
             getConfiguration().set("mapred.working.dir",
-                mTestUtil.getDataTestDir("mapred-working").toString());
+                _testUtility.getDataTestDir("mapred-working").toString());
 
             getLog().info("MapReduce cluster started.");
         }
-        mIsRunning = true;
+        _isRunning = true;
     }
 
     /**
@@ -206,7 +213,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
      * @return Whether the cluster is running.
      */
     public boolean isRunning() {
-        return mIsRunning;
+        return _isRunning;
     }
 
     /**
@@ -215,7 +222,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
      * @return The cluster configuration.
      */
     public Configuration getConfiguration() {
-        return mTestUtil.getConfiguration();
+        return _testUtility.getConfiguration();
     }
 
     /**
@@ -224,19 +231,19 @@ public class PluginMiniHBaseCluster extends MavenLogged {
      * @throws Exception If there is an error.
      */
     public void shutdown() throws Exception {
-        if (!mIsRunning) {
+        if (!_isRunning) {
             getLog().error(
                 "Attempting to shut down a cluster, but one was never started in this process.");
             return;
         }
-        if (mIsMapReduceEnabled) {
+        if (_isMapReduceEnabled) {
             getLog().info("Shutting down MapReduce cluster...");
-            mTestUtil.shutdownMiniMapReduceCluster();
+            _testUtility.shutdownMiniMapReduceCluster();
             getLog().info("MapReduce cluster shut down.");
         }
-        if (mMiniCluster != null) {
-            mMiniCluster.shutdown();
+        if (_miniHbaseCluster != null) {
+            _miniHbaseCluster.shutdown();
         }
-        mTestUtil.shutdownMiniCluster();
+        _testUtility.shutdownMiniCluster();
     }
 }
