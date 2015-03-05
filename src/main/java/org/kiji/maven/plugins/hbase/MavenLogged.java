@@ -26,15 +26,15 @@ public abstract class MavenLogged implements MavenLoggable {
     /**
      * The maven log used to communicate with the maven user.
      */
-    private final Log mLog;
+    private final Log _log;
 
     /**
      * Constructor.
      *
      * @param log The maven log.
      */
-    protected MavenLogged(Log log) {
-        mLog = log;
+    protected MavenLogged(final Log log) {
+        _log = log;
     }
 
     /**
@@ -42,6 +42,6 @@ public abstract class MavenLogged implements MavenLoggable {
      */
     @Override
     public Log getLog() {
-        return mLog;
+        return _log;
     }
 }

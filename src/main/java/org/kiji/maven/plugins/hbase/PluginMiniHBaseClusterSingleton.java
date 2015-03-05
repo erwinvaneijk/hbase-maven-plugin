@@ -34,11 +34,11 @@ public enum PluginMiniHBaseClusterSingleton {
     /**
      * The thread that runs the mini HBase cluster.
      */
-    private PluginMiniHBaseClusterThread mThread;
+    private PluginMiniHBaseClusterThread _miniHBaseClusterThread;
     /**
      * The HBase cluster being run.
      */
-    private PluginMiniHBaseCluster mCluster;
+    private PluginMiniHBaseCluster _miniCluster;
 
     /**
      * Starts the HBase cluster and blocks until it is ready.
@@ -48,21 +48,21 @@ public enum PluginMiniHBaseClusterSingleton {
      * @param conf               Hadoop configuration for the cluster.
      * @throws IOException If there is an error.
      */
-    public void startAndWaitUntilReady(Log log, boolean alsoStartMapReduce, Configuration conf)
+    public void startAndWaitUntilReady(final Log log, final boolean alsoStartMapReduce, final Configuration conf)
         throws IOException {
-        mCluster = new PluginMiniHBaseCluster(log, alsoStartMapReduce, conf);
-        mThread = new PluginMiniHBaseClusterThread(log, mCluster);
+        _miniCluster = new PluginMiniHBaseCluster(log, alsoStartMapReduce, conf);
+        _miniHBaseClusterThread = new PluginMiniHBaseClusterThread(log, _miniCluster);
 
         log.info("Starting new thread...");
-        mThread.start();
+        _miniHBaseClusterThread.start();
 
         // Wait for the cluster to be ready.
         log.info("Waiting for cluster to be ready...");
-        while (!mThread.isClusterReady()) {
+        while (!_miniHBaseClusterThread.isClusterReady()) {
             try {
                 Thread.sleep(1000);
             }
-            catch (InterruptedException e) {
+            catch (final InterruptedException e) {
                 log.info("Still waiting...");
             }
         }
@@ -75,10 +75,10 @@ public enum PluginMiniHBaseClusterSingleton {
      * @return The configuration.
      */
     public Configuration getClusterConfiguration() {
-        if (null == mCluster) {
+        if (null == _miniCluster) {
             throw new IllegalStateException("The cluster has not started yet.");
         }
-        return mCluster.getConfiguration();
+        return _miniCluster.getConfiguration();
     }
 
     /**
@@ -86,19 +86,19 @@ public enum PluginMiniHBaseClusterSingleton {
      *
      * @param log The maven log.
      */
-    public void stop(Log log) {
-        if (null == mCluster) {
+    public void stop(final Log log) {
+        if (null == _miniCluster) {
             log.error("Attempted to stop a cluster, but no cluster was ever started in this process.");
             return;
         }
 
         log.info("Stopping the HBase cluster thread...");
-        mThread.stopClusterGracefully();
-        while (mThread.isAlive()) {
+        _miniHBaseClusterThread.stopClusterGracefully();
+        while (_miniHBaseClusterThread.isAlive()) {
             try {
-                mThread.join();
+                _miniHBaseClusterThread.join();
             }
-            catch (InterruptedException e) {
+            catch (final InterruptedException e) {
                 log.debug("HBase cluster thread interrupted.");
             }
         }

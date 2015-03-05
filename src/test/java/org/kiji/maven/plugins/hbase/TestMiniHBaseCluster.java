@@ -35,111 +35,120 @@ import org.apache.maven.plugin.logging.Log;
 import org.junit.Before;
 import org.junit.Test;
 
+/**
+ * Test the MiniHbaseCluster for all its subtleties.
+ */
 public class TestMiniHBaseCluster {
-  /** A mock maven log. */
-  private Log mLog;
+    /**
+     * A mock maven log.
+     */
+    private Log _log;
 
-  /** A mock HBase testing utility that starts and stops clusters. */
-  private HBaseTestingUtility mHBaseTestUtil;
+    /**
+     * A mock HBase testing utility that starts and stops clusters.
+     */
+    private HBaseTestingUtility _hbaseTestingUtil;
 
-  @Before
-  public void createMocks() {
-    mLog = createMock(Log.class);
-    mHBaseTestUtil = createMock(HBaseTestingUtility.class);
-  }
-
-  /**
-   * Tells the mock to start listening for expected calls.
-   */
-  private void replayMocks() {
-    replay(mLog);
-    replay(mHBaseTestUtil);
-  }
-
-  /**
-   * Verifies that the mocks have received all their expected calls.
-   */
-  private void verifyMocks() {
-    verify(mLog);
-    verify(mHBaseTestUtil);
-  }
-
-  @Test
-  public void testWithMapReduceDisabled() throws Exception {
-    // Expect any number of log calls.
-    mLog.info(anyObject(String.class));
-    expectLastCall().anyTimes();
-
-    // Expect the HBase cluster to be configured, started, and stopped.
-    expect(mHBaseTestUtil.getConfiguration()).andReturn(new Configuration()).anyTimes();
-    expect(mHBaseTestUtil.startMiniCluster()).andReturn(null);
-    mHBaseTestUtil.shutdownMiniCluster();
-
-    replayMocks();
-    PluginMiniHBaseCluster cluster = new PluginMiniHBaseCluster(mLog, false /* Disable MR */, mHBaseTestUtil);
-    cluster.startup();
-    cluster.shutdown();
-    verifyMocks();
-  }
-
-  @Test
-  public void testWithMapReduceEnabled() throws Exception {
-    // Expect any number of log calls.
-    mLog.info(anyObject(String.class));
-    expectLastCall().anyTimes();
-
-    // Expect the HBase testing utility to be configured.
-    expect(mHBaseTestUtil.getConfiguration()).andReturn(new Configuration()).anyTimes();
-
-    // Expect the HBase cluster to be started and stopped.
-    expect(mHBaseTestUtil.startMiniCluster()).andReturn(null);
-    mHBaseTestUtil.shutdownMiniCluster();
-
-    // Expect that the MapReduce cluster will be started and stopped.
-    expect(mHBaseTestUtil.startMiniMapReduceCluster()).andReturn(null).anyTimes();
-
-    mHBaseTestUtil.shutdownMiniMapReduceCluster();
-    // Expect the HBase testing utility to request a test dir for mapred.
-    expect(mHBaseTestUtil.getDataTestDir(anyObject(String.class)))
-        .andReturn(new Path("/mapred-working"));
-
-    replayMocks();
-    PluginMiniHBaseCluster cluster = new PluginMiniHBaseCluster(mLog, true /* Enable MR */, mHBaseTestUtil);
-    cluster.startup();
-    cluster.shutdown();
-    verifyMocks();
-  }
-
-  @Test
-  public void testListenerOccupied() throws Exception {
-    // Test that findOpenPort() doesn't return a port we know to be in use.
-    ServerSocket ss = new ServerSocket(9867);
-    ss.setReuseAddress(true);
-    try {
-      int openPort = PluginMiniHBaseCluster.findOpenPort(9867);
-      assertTrue("Port 9867 is already bound!", openPort > 9867);
-    } finally {
-      ss.close();
-    }
-  }
-
-  @Test
-  public void testListenerOpen() throws Exception {
-    // Test that findOpenPort() can return a port we don't believe is in use.
-    ServerSocket ss = null;
-    try {
-      ss = new ServerSocket(9867);
-      ss.setReuseAddress(true);
-    } finally {
-      if (null != ss) {
-        ss.close();
-      }
+    @Before
+    public void createMocks() {
+        _log = createMock(Log.class);
+        _hbaseTestingUtil = createMock(HBaseTestingUtility.class);
     }
 
-    // Port 9867 is unlikely to be in use, since we just successfully bound to it
-    // and closed it.
+    @Test
+    public void testWithMapReduceDisabled() throws Exception {
+        // Expect any number of log calls.
+        _log.info(anyObject(String.class));
+        expectLastCall().anyTimes();
 
-    int openPort = PluginMiniHBaseCluster.findOpenPort(9867);
-    assertEquals("Port 9867 shouldn't be currently bound!", 9867, openPort);
-  }
+        // Expect the HBase cluster to be configured, started, and stopped.
+        expect(_hbaseTestingUtil.getConfiguration()).andReturn(new Configuration()).anyTimes();
+        expect(_hbaseTestingUtil.startMiniCluster()).andReturn(null);
+        _hbaseTestingUtil.shutdownMiniCluster();
+
+        replayMocks();
+        final PluginMiniHBaseCluster cluster = new PluginMiniHBaseCluster(_log, false /* Disable MR */, _hbaseTestingUtil);
+        cluster.startup();
+        cluster.shutdown();
+        verifyMocks();
+    }
+
+    /**
+     * Tells the mock to start listening for expected calls.
+     */
+    private void replayMocks() {
+        replay(_log);
+        replay(_hbaseTestingUtil);
+    }
+
+    /**
+     * Verifies that the mocks have received all their expected calls.
+     */
+    private void verifyMocks() {
+        verify(_log);
+        verify(_hbaseTestingUtil);
+    }
+
+    @Test
+    public void testWithMapReduceEnabled() throws Exception {
+        // Expect any number of log calls.
+        _log.info(anyObject(String.class));
+        expectLastCall().anyTimes();
+
+        // Expect the HBase testing utility to be configured.
+        expect(_hbaseTestingUtil.getConfiguration()).andReturn(new Configuration()).anyTimes();
+
+        // Expect the HBase cluster to be started and stopped.
+        expect(_hbaseTestingUtil.startMiniCluster()).andReturn(null);
+        _hbaseTestingUtil.shutdownMiniCluster();
+
+        // Expect that the MapReduce cluster will be started and stopped.
+        expect(_hbaseTestingUtil.startMiniMapReduceCluster()).andReturn(null).anyTimes();
+
+        _hbaseTestingUtil.shutdownMiniMapReduceCluster();
+        // Expect the HBase testing utility to request a test dir for mapred.
+        expect(_hbaseTestingUtil.getDataTestDir(anyObject(String.class)))
+            .andReturn(new Path("/mapred-working"));
+
+        replayMocks();
+        final PluginMiniHBaseCluster cluster = new PluginMiniHBaseCluster(_log, true /* Enable MR */, _hbaseTestingUtil);
+        cluster.startup();
+        cluster.shutdown();
+        verifyMocks();
+    }
+
+    @Test
+    public void testListenerOccupied() throws Exception {
+        // Test that findOpenPort() doesn't return a port we know to be in use.
+        final ServerSocket ss = new ServerSocket(9867);
+        ss.setReuseAddress(true);
+        try {
+            final int openPort = PluginMiniHBaseCluster.findOpenPort(9867);
+            assertTrue("Port 9867 is already bound!", openPort > 9867);
+        }
+        finally {
+            ss.close();
+        }
+    }
+
+    @Test
+    public void testListenerOpen() throws Exception {
+        // Test that findOpenPort() can return a port we don't believe is in use.
+        ServerSocket ss = null;
+        try {
+            ss = new ServerSocket(9867);
+            ss.setReuseAddress(true);
+        }
+        finally {
+            if (null != ss) {
+                ss.close();
+            }
+        }
+
+        // Port 9867 is unlikely to be in use, since we just successfully bound to it
+        // and closed it.
+
+        final int openPort = PluginMiniHBaseCluster.findOpenPort(9867);
+        assertEquals("Port 9867 shouldn't be currently bound!", 9867, openPort);
+    }
 }

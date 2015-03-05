@@ -54,7 +54,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
      * @param enableMapReduce Whether to also use a mini MapReduce cluster.
      * @param conf            Hadoop configuration for the cluster.
      */
-    public PluginMiniHBaseCluster(Log log, boolean enableMapReduce, Configuration conf) {
+    public PluginMiniHBaseCluster(final Log log, final boolean enableMapReduce, final Configuration conf) {
         //this(log, enableMapReduce, new HBaseTestingUtility(conf));
         super(log);
         getLog().info("PluginMiniHBaseCluster(configuration)");
@@ -71,7 +71,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
      * @param enableMapReduce Whether to also use a mini MapReduce cluster.
      * @param hbaseTestUtil   An HBase testing utility that can start and stop mini clusters.
      */
-    public PluginMiniHBaseCluster(Log log, boolean enableMapReduce, HBaseTestingUtility hbaseTestUtil) {
+    public PluginMiniHBaseCluster(final Log log, final boolean enableMapReduce, final HBaseTestingUtility hbaseTestUtil) {
         super(log);
         getLog().info("The other one.");
         _testUtility = configure(hbaseTestUtil);
@@ -85,12 +85,12 @@ public class PluginMiniHBaseCluster extends MavenLogged {
      * @param testUtil The test utility to reconfigure.
      * @return The configured utility.
      */
-    private static HBaseTestingUtility configure(HBaseTestingUtility testUtil) {
+    private static HBaseTestingUtility configure(final HBaseTestingUtility testUtil) {
         // If HBase servers are running locally, the utility will use
         // the "normal" ports. We override *all* ports first, so that
         // we ensure that this can start without a problem.
 
-        Configuration conf = testUtil.getConfiguration();
+        final Configuration conf = testUtil.getConfiguration();
         reconfigure(conf);
         return testUtil;
     }
@@ -106,7 +106,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
         // the "normal" ports. We override *all* ports first, so that
         // we ensure that this can start without a problem.
 
-        int offset = new Random(System.currentTimeMillis()).nextInt(1500) + 500;
+        final int offset = new Random(System.currentTimeMillis()).nextInt(1500) + 500;
 
         // Move the master to a hopefully unused port.
         // configuration.setInt(HConstants.MASTER_PORT, findOpenPort(HConstants.DEFAULT_MASTER_PORT + offset));
@@ -127,9 +127,6 @@ public class PluginMiniHBaseCluster extends MavenLogged {
         configuration.set("hbase.master.logcleaner.plugins",
             "org.apache.hadoop.hbase.master.cleaner.TimeToLiveLogCleaner");
 
-        // TODO(gwu): Increasing the port numbers by a constant is not sufficient for multiple
-        // executions of this plugin on the same machine.  Allow this to be specified as a
-        // maven plugin parameter.
         return configuration;
     }
 
@@ -140,7 +137,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
      * @return an open port number.
      * @throws IllegalArgumentException if it can't find an open port.
      */
-    public static int findOpenPort(int startPort) {
+    public static int findOpenPort(final int startPort) {
         if (startPort < 1024 || startPort > 65534) {
             throw new IllegalArgumentException("Invalid start port: " + startPort);
         }
@@ -152,7 +149,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
                 ss.setReuseAddress(true);
                 return port;
             }
-            catch (IOException ioe) {
+            catch (final IOException ioe) {
                 // This port isn't open. Loop around.
             }
             finally {
@@ -163,7 +160,7 @@ public class PluginMiniHBaseCluster extends MavenLogged {
                         // when the client of this method calls this function.
                         ss.close();
                     }
-                    catch (IOException ioe) {
+                    catch (final IOException ioe) {
                         // Shouldn't happen.
                     }
                 }

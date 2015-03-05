@@ -47,11 +47,11 @@ public class PluginMiniHBaseClusterThread extends Thread implements MavenLoggabl
      * Creates a new <code>MiniHBaseClusterThread</code> instance.
      *
      * @param log          The maven log.
-     * @param hbaseCluster The hbase cluster to run.
+     * @param miniHBaseCluster The hbase cluster to run.
      */
-    public PluginMiniHBaseClusterThread(Log log, PluginMiniHBaseCluster hbaseCluster) {
+    public PluginMiniHBaseClusterThread(final Log log, final PluginMiniHBaseCluster miniHBaseCluster) {
         _log = log;
-        _pluginMiniHBaseCluster = hbaseCluster;
+        _pluginMiniHBaseCluster = miniHBaseCluster;
         _isClusterReady = false;
         _isStopRequested = false;
     }
@@ -84,7 +84,7 @@ public class PluginMiniHBaseClusterThread extends Thread implements MavenLoggabl
         try {
             _pluginMiniHBaseCluster.startup();
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             getLog().error("Unable to start an HBase cluster.", e);
             interrupt();
             return;
@@ -98,7 +98,7 @@ public class PluginMiniHBaseClusterThread extends Thread implements MavenLoggabl
             try {
                 sleep(1000);
             }
-            catch (InterruptedException e) {
+            catch (final InterruptedException e) {
                 getLog().debug("Main thread interrupted while waiting for cluster to stop.");
             }
         }
@@ -107,7 +107,7 @@ public class PluginMiniHBaseClusterThread extends Thread implements MavenLoggabl
         try {
             _pluginMiniHBaseCluster.shutdown();
         }
-        catch (Exception e) {
+        catch (final Exception e) {
             getLog().error("Unable to stop the HBase cluster.", e);
             return;
         }

@@ -37,7 +37,7 @@ public class StopMojo extends AbstractMojo {
      *
      * @parameter property="skip" default-value="false"
      */
-    private boolean mSkip;
+    private boolean _skip;
 
     /**
      * The build directory for this project.
@@ -45,7 +45,7 @@ public class StopMojo extends AbstractMojo {
      * @parameter property="projectBuildDir" default-value="${project.build.directory}"
      * @required
      */
-    private String mProjectBuildDir;
+    private String _projectBuildDir;
 
     /**
      * If true, the Hadoop temporary directory (given by Hadoop configuration property hadoop.tmp
@@ -55,15 +55,15 @@ public class StopMojo extends AbstractMojo {
      * @parameter property="saveHadoopTmpDir" expression="${save.hadoop.tmp}" default-value="false"
      * @required
      */
-    private boolean mSaveHadoopTmpDir;
+    private boolean _saveHadoopTmpDir;
 
     /**
      * Sets the output directory for the project's build.
      *
      * @param dir The path to the output directory.
      */
-    public void setProjectBuildDir(String dir) {
-        mProjectBuildDir = dir;
+    public void setProjectBuildDir(final String dir) {
+        _projectBuildDir = dir;
     }
 
     /**
@@ -71,8 +71,8 @@ public class StopMojo extends AbstractMojo {
      *
      * @param skip If true, this goal should do nothing.
      */
-    public void setSkip(boolean skip) {
-        mSkip = skip;
+    public void setSkip(final boolean skip) {
+        _skip = skip;
     }
 
     /**
@@ -83,8 +83,8 @@ public class StopMojo extends AbstractMojo {
      * @param saveTempDir If true, the directory will be copied to the project build directory
      *                    before the cluster is shutdown.
      */
-    public void setSaveHadoopTmpDir(boolean saveTempDir) {
-        mSaveHadoopTmpDir = saveTempDir;
+    public void setSaveHadoopTmpDir(final boolean saveTempDir) {
+        _saveHadoopTmpDir = saveTempDir;
     }
 
     /**
@@ -92,11 +92,11 @@ public class StopMojo extends AbstractMojo {
      */
     @Override
     public void execute() throws MojoExecutionException {
-        if (mSkip) {
+        if (_skip) {
             getLog().info("Not stopping an HBase cluster because skip=true.");
             return;
         }
-        if (mSaveHadoopTmpDir) {
+        if (_saveHadoopTmpDir) {
             copyHadoopTmpDir();
         }
         PluginMiniHBaseClusterSingleton.INSTANCE.stop(getLog());
@@ -107,16 +107,16 @@ public class StopMojo extends AbstractMojo {
      * project build directory.
      */
     private void copyHadoopTmpDir() {
-        String tmpDirProperty =
+        final String tmpDirProperty =
             PluginMiniHBaseClusterSingleton.INSTANCE.getClusterConfiguration().get("hadoop.tmp.dir");
-        File hadoopTmp = new File(tmpDirProperty);
-        File hadoopTmpCopy = new File(new File(mProjectBuildDir), "hadoop-tmp");
+        final File hadoopTmp = new File(tmpDirProperty);
+        final File hadoopTmpCopy = new File(new File(_projectBuildDir), "hadoop-tmp");
         getLog().info("Copying " + hadoopTmp.toString() + " to " + hadoopTmpCopy.toString());
         try {
             FileUtils.copyDirectory(hadoopTmp, hadoopTmpCopy);
             getLog().info("Successfully copied hadoop tmp dir.");
         }
-        catch (IOException e) {
+        catch (final IOException e) {
             getLog().warn("The Hadoop tmp dir could not be copied to the project's build directory.", e);
         }
     }
