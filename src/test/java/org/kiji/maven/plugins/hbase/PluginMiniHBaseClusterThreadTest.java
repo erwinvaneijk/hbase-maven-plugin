@@ -33,8 +33,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Test the interface offered by the {@link PluginMiniHBaseClusterThread}.
  */
-public class TestMiniHBaseClusterThread {
-    private static final Logger LOG = LoggerFactory.getLogger(TestMiniHBaseClusterThread.class);
+public class PluginMiniHBaseClusterThreadTest {
+    private static final Logger LOG = LoggerFactory.getLogger(PluginMiniHBaseClusterThreadTest.class);
 
     /**
      * Tests that the thread can be started up and shut down gracefully.

@@ -38,7 +38,7 @@ import org.junit.Test;
 /**
  * Test the MiniHbaseCluster for all its subtleties.
  */
-public class TestMiniHBaseCluster {
+public class PluginMiniHBaseClusterTest {
     /**
      * A mock maven log.
      */

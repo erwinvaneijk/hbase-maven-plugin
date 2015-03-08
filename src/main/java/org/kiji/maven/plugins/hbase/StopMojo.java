@@ -88,6 +88,13 @@ public class StopMojo extends AbstractMojo {
     }
 
     /**
+     * If true, also start a mini MapReduce cluster.
+     *
+     * @parameter property="mapReduceEnabled" expression="${mapreduce.enabled}" default-value="false"
+     */
+    private boolean _isMapReduceEnabled;
+
+    /**
      * {@inheritDoc}
      */
     @Override
@@ -100,6 +107,15 @@ public class StopMojo extends AbstractMojo {
             copyHadoopTmpDir();
         }
         PluginMiniHBaseClusterSingleton.INSTANCE.stop(getLog());
+    }
+
+    /**
+     * Sets whether we should stop a mini MapReduce cluster in addition to the HBase cluster.
+     *
+     * @param enabled Whether to stop a mini MapReduce cluster.
+     */
+    public void setMapReduceEnabled(final boolean enabled) {
+        _isMapReduceEnabled = enabled;
     }
 
     /**
