@@ -52,7 +52,7 @@ public class StopMojo extends AbstractMojo {
      * .dir) will be cleared before the cluster is started, then copied to the project's build
      * directory before the cluster is shutdown.
      *
-     * @parameter property="saveHadoopTmpDir" expression="${save.hadoop.tmp}" default-value="false"
+     * @parameter property="saveHadoopTmpDir" default-value="false"
      * @required
      */
     private boolean _saveHadoopTmpDir;
@@ -90,7 +90,7 @@ public class StopMojo extends AbstractMojo {
     /**
      * If true, also start a mini MapReduce cluster.
      *
-     * @parameter property="mapReduceEnabled" expression="${mapreduce.enabled}" default-value="false"
+     * @parameter property="mapReduceEnabled" default-value="false"
      */
     private boolean _isMapReduceEnabled;
 
