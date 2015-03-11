@@ -12,11 +12,11 @@ an HBase cluster.  Typically, you will bind the `start` goal to your
 Selecting a Hadoop backend
 --------------------------
 
-This plugin can be run against multiple Hadoop backends. Version 1.0.10-cdh4
-will run with a CDH4-based cluster; Version 1.0.9-hadoop1 will use an Apache
-Hadoop 1.x / HBase 0.92 backend.
+This plugin can be run against multiple Hadoop backends. Version 1.1.0
+will run with a standard hbase cluster using the YARN/Hadoop 2 based
+HBase 1.0.0 line.
 
-To run with 1.0.10-hadoop1, you must:
+To run with 1.1.0, you must:
 * Set `umask 0022`
 * Disable IPv6 in your maven process: `export MAVEN_OPTS="-Djava.net.preferIPv4Stack=true"`
 
